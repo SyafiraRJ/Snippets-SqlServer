@@ -1,0 +1,157 @@
+<CodeSnippets xmlns="http://schemas.microsoft.com/SqlServer/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>STRING_AGG (gabung), COUNT(hitung data)</Title>
+			<Description>Gabungkan produk jadi satu string</Description>
+			<Shortcut>stringAgg</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+STRING_AGG(namaproduk, ', ') AS daftar_produk,
+COUNT(*) AS BanyakProduct
+        ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>ISNULL, COALESCE, SUM(jumlahin)</Title>
+			<Description>Ganti NULL jadi angka/text, jumlahkan nilai, pilih nilai pertama yang tidak NULL.</Description>
+			<Shortcut>isnull_SUM</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+-- Jumlahkan qty, kalau NULL diganti 0
+ISNULL(SUM(qty), 0) AS total_qty,
+
+--type waktu kan datetime. makanya diubah dari varchar ke 120 itu format standar: yyyy-mm-dd hh:mi:ss.
+ISNULL(CONVERT(varchar, PSJP.WaktuPerubahanTerjadi, 120), '-') AS TerakhirDiubah
+
+-- Ambil nilai pertama yang tidak NULL dari daftar nilai
+COALESCE(nilai1, nilai2, 'pengganti') AS hasil
+            ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>CASE WHEN (if else)</Title>
+			<Description>Kategorikan harga</Description>
+			<Shortcut>casewhen_kategori_harga</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+SELECT namaProduk,
+       harga,
+       CASE 
+           WHEN harga < 50000 THEN 'Murah'
+           WHEN harga BETWEEN 50000 AND 200000 THEN 'Sedang'
+           ELSE 'Mahal'
+       END AS kategori
+FROM products;
+        ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>DATEADD</Title>
+			<Description>SECOND,MINUTE, HOUR, DAY, WEEK, MONTH, YEAR</Description>
+			<Shortcut>dateadd</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+SELECT DATEADD(DAY, 7, tanggal) AS seminggu_setelah,
+	DATEADD(MONTH, 7, tanggal) AS tambahBulan
+FROM orders;
+        ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>LEFT JOIN (semua ambil), JOIN (yang cocok aja)</Title>
+			<Description>Ambil semua dari kiri, kanan boleh kosong (NULL) / gabung semua tabel walaupun ga ada fk</Description>
+			<Shortcut>leftjoin</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+SELECT u.username, o.idorder
+FROM users u
+LEFT JOIN orders o ON u.iduser = o.iduser;
+        ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>GROUP BY</Title>
+			<Description>Gabung dan hitung langsung (tanpa user yang kosong)</Description>
+			<Shortcut>groupby</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+-- Hitung total order per user
+SELECT iduser, COUNT(idorder) AS total_order
+FROM orders
+GROUP BY iduser;
+
+-- Tambahkan LEFT JOIN agar semua user tetap muncul (walaupun belum ada order)
+SELECT u.username, COUNT(o.id) AS jumlah_order
+FROM users u
+LEFT JOIN orders o ON u.iduser = o.iduser
+GROUP BY u.username;
+            ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>OUTER APPLY (fleksibel, gabungan group by, left join, AND)</Title>
+			<Description>Ambil 1 data khusus per user, lebih fleksibel dari JOIN biasa</Description>
+			<Shortcut>outerapply</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+-- Ambil 1 produk random untuk setiap user
+SELECT u.username, p.namaproduk
+FROM users u
+OUTER APPLY (
+    SELECT TOP 1 namaproduk
+    FROM products
+    ORDER BY NEWID() -- NEWID() = random order, bisa ganti ASC / DESC untuk urutan biasa
+) p;
+
+-- Ambil semua produk untuk setiap user
+SELECT u.username, p.namaproduk
+FROM users u
+CROSS JOIN products p;
+
+-- Hitung jumlah order untuk setiap user (termasuk user tanpa order)
+SELECT u.username, x.jumlah_order
+FROM users u
+OUTER APPLY (
+    SELECT COUNT(*) AS jumlah_order
+    FROM orders o
+    WHERE o.iduser = u.iduser
+) x;
+            ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+
+</CodeSnippets>

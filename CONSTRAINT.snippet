@@ -1,0 +1,33 @@
+<CodeSnippets xmlns="http://schemas.microsoft.com/SqlServer/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>CREATE TABLE</Title>
+			<Description>CONSTRAINT Para Column</Description>
+			<Shortcut>column_constraint</Shortcut>
+		</Header>
+		<Snippet>
+			<Code Language="SQL">
+				<![CDATA[
+CREATE TABLE users (
+    id_user INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    CONSTRAINT panjangUsername CHECK (LEN(username) >= 3)
+);
+
+CREATE TABLE orders (
+    id_order INT IDENTITY(1,1) PRIMARY KEY,
+    id_user INT NOT NULL,
+    tanggal_order DATETIME NOT NULL DEFAULT GETDATE(),
+    total_harga DECIMAL(18,2) NOT NULL,
+	status VARCHAR(20) NOT NULL DEFAULT 'diproses',
+
+    CONSTRAINT fk_orders_users FOREIGN KEY (id_user) REFERENCES users(id_user),
+    CONSTRAINT chk_harga CHECK (total_harga >= 0),
+	CONSTRAINT chk_status CHECK (status IN ('diproses', 'dikirim', 'selesai', 'dibatalkan'))
+);
+
+        ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
